@@ -1,0 +1,302 @@
+import random
+import sqlite3
+database = sqlite3.connect("assignment3_1.db")
+
+cursor = database.cursor() 
+
+# print("Instructor table")
+# cursor.execute("""SELECT * FROM INSTRUCTOR""")
+# query_result = cursor.fetchall()
+
+# cursor.execute( """CREATE TABLE COURSE (  
+# CRN INTEGER PRIMARY KEY NOT NULL,
+# Title TEXT NOT NULL,
+# Department TEXT NOT NULL,
+# Time TEXT NOT NULL,
+# DOTW Text NOT NULL,
+# Semester TEXT NOT NULL,
+# Year INTEGER NOT NULL,
+# Credits INTEGER NOT NULL)
+# ;""" )
+#cursor.execute(sql_command)
+
+#Add Instructor Column to Course
+#cursor.execute("ALTER TABLE COURSE ADD COLUMN INSTRUCTOR TEXT;")
+
+
+# cursor.execute("""INSERT INTO COURSE VALUES(1111, 'Applied Programming', 'BSCO', '10:00', 'M/T/TH', 'Summer', 2025, 4)""")
+# sql_command = """INSERT INTO COURSE VALUES(0001, 'Advanced Digital Circuit Design', 'CE', '12:30', 'M/W/F', 'Summer', 2025, 3);"""
+# cursor.execute(sql_command) 
+
+# sql_command = """INSERT INTO COURSE VALUES(0002, 'Computer Networks', 'HUSS', '3:30', 'M/W/F', 'Summer', 2025, 3);"""
+# cursor.execute(sql_command) 
+
+# sql_command = """INSERT INTO COURSE VALUES(0003, 'Signal And Systems', 'BSAS', '3:00', 'T/TH', 'Summer', 2025, 3);"""
+# cursor.execute(sql_command) 
+
+# sql_command = """INSERT INTO COURSE VALUES(0004, 'Statistics', 'BSCO', '2:00', 'M/T/TH', 'Summer', 2025, 3);"""
+# cursor.execute(sql_command) 
+
+# sql_command = """INSERT INTO COURSE VALUES(0005, 'Physics', 'BSME', '11:00', 'M/T/W/TH', 'Summer', 2025, 3);"""
+# cursor.execute(sql_command) 
+
+# sql_command = """INSERT INTO COURSE VALUES(0006, 'Architechture', 'ARCH', '3:30', 'M/W/F', 'Fall', 2025, 4, 'Wentworth');"""
+# cursor.execute(sql_command) 
+
+# sql_command = """INSERT INTO COURSE VALUES(0007, 'Circuit Thoery I', 'BSCO', '8:00', 'T/TH', 'Fall', 2025, 4, 'teslan');"""
+# cursor.execute(sql_command)
+
+# sql_command = """INSERT INTO COURSE VALUES(0008, 'Circuit Thoery II', 'BSCO', '8:00', 'T/TH', 'Spring', 2025, 4, 'teslan');"""
+# cursor.execute(sql_command)
+
+# sql_command = """INSERT INTO COURSE VALUES(0009, 'Circuit Thoery III', 'BSCO', '8:00', 'T/TH', 'Fall', 2025, 4, 'teslan');"""
+# cursor.execute(sql_command)
+
+# sql_command = """INSERT INTO COURSE VALUES(0010, 'Calculus I', 'MATH', '3:30', 'M/W/F', 'Fall', 2025, 4,'Eiffel');"""
+# cursor.execute(sql_command)
+
+# sql_command = """INSERT INTO COURSE VALUES(0011, 'Calculus II', 'MATH', '3:30', 'M/W/F', 'Spring', 2025, 4, 'Eiffel');"""
+# cursor.execute(sql_command)
+
+# sql_command = """INSERT INTO COURSE VALUES(0012, 'Physics II', 'BSME', '5:00', 'M/T/TH', 'Spring', 2025, 4, 'Bernoulli');"""
+# cursor.execute(sql_command)
+
+# sql_command = """INSERT INTO COURSE VALUES(0013, 'OOP', 'BSCO', '10:00', 'M/T/TH', 'Summer', 2026, 4, 'davincil');"""
+# cursor.execute(sql_command)
+
+# sql_command = """INSERT INTO COURSE VALUES(0014, 'Statistics', 'MATH', '9:15', 'M/W', 'Summer', 2026, 4, 'Stephenson');"""
+# cursor.execute(sql_command)
+
+# sql_command = """INSERT INTO COURSE VALUES(0015, 'Signals and Systems', 'BSME', '3:30', 'T/TH', 'Summer', 2025, 4, 'Bernoulli');"""
+# cursor.execute(sql_command)
+
+# sql_command = """INSERT INTO COURSE VALUES(0016, 'English I', 'ENG', '10:00', 'T/TH', 'Summer', 2025, 4, 'Obama');"""
+# cursor.execute(sql_command)
+
+# sql_command = """INSERT INTO COURSE VALUES(0017, 'Multi-Variable Calculus', 'MATH', '11:15', 'T/TH', 'Spring', 2025, 4, 'Eiffel');"""
+# cursor.execute(sql_command)
+
+# sql_command = """INSERT INTO COURSE VALUES(0018, 'Engineering Boston', 'CVL', '4:15', 'T/TH', 'Fall', 2025, 4, 'Jefferson');"""
+# cursor.execute(sql_command)
+
+# sql_command = """INSERT INTO COURSE VALUES(0019, 'Civil Eng I', 'CVL', '3:15', 'M/T/F', 'Fall', 2025, 4, 'Jefferson');"""
+# cursor.execute(sql_command)
+
+# sql_command = """INSERT INTO COURSE VALUES(0020, 'Civil Eng II', 'CVL', '3:15', 'M/T/F', 'Spring', 2026, 4, 'Jefferson');"""
+# cursor.execute(sql_command)
+
+#Students
+
+# sql_command = """INSERT INTO STUDENT VALUES(10011, 'John', 'Coltrane', 1942, 'BSCH', 'coltranej');"""
+# cursor.execute(sql_command) 
+
+# sql_command = """INSERT INTO STUDENT VALUES(10012, 'Miles', 'Davis', 1965, 'BSCH', 'davism');"""
+# cursor.execute(sql_command)
+
+# sql_command = """INSERT INTO STUDENT VALUES(10013, 'Art', 'Blakey', 2020, 'BSCO', 'blakeya', 3, 4, 7, 1, 2);"""
+# cursor.execute(sql_command) 
+
+# sql_command = """INSERT INTO STUDENT VALUES(10014, 'Joe', 'Henderson', 2021, 'BSME', 'hendersonj', 3,4,7,1,2);"""
+# cursor.execute(sql_command) 
+
+# sql_command = """INSERT INTO STUDENT VALUES(10015, 'Herbie', 'Hancock', 1965, 'MATH', 'hancockh',4,5,10,16,19);"""
+# cursor.execute(sql_command) 
+
+# sql_command = """INSERT INTO STUDENT VALUES(10016, 'Jeff', 'Lorber', 1965, 'CVL', 'lorberj',5, 6, 10, 12, 19);"""
+# cursor.execute(sql_command) 
+
+# sql_command = """INSERT INTO STUDENT VALUES(10017, 'Ron', 'Carter', 2021, 'BSCO', 'carterr', 3, 4, 9, 1111, 13);"""
+# cursor.execute(sql_command) 
+
+# sql_command = """INSERT INTO STUDENT VALUES(10018, 'Tony', 'Williams', 1965, 'MATH', 'williamst', 12, 1, 3, 13, 17 );"""
+# cursor.execute(sql_command)
+
+# sql_command = """INSERT INTO STUDENT VALUES(10019, 'Herbie', 'Hancock', 1965, 'MATH', 'hancockh', 16, 18, 1111, 14, 4);"""
+# cursor.execute(sql_command) 
+
+#Instructors
+# sql_command = """INSERT INTO INSTRUCTOR VALUES(20007, 'Nikola', 'Tesla', 'Full Prof.', 1800, 'BSCO', 'teslan');"""
+# cursor.execute(sql_command) 
+
+# sql_command = """INSERT INTO INSTRUCTOR VALUES(20008, 'Leonardo', 'da Vinci', 'Full Prof.', 1700, 'BSCO', 'davincil');"""
+# cursor.execute(sql_command) 
+
+# sql_command = """INSERT INTO INSTRUCTOR VALUES(20009, 'Henry', 'Ford', 'Associate Prof.', 1899, 'BASA', 'fordh');"""
+# cursor.execute(sql_command)
+
+# sql_command = """INSERT INTO INSTRUCTOR VALUES(20010, 'Gustave', 'Eiffel', 'Full Prof.', 2000, 'MATH', 'eiffelg');"""
+# cursor.execute(sql_command)
+
+# sql_command = """INSERT INTO INSTRUCTOR VALUES(20011, 'Thomas', 'Jefferson', 'Full Prof.', 1800, 'CVL', 'jeffersont');"""
+# cursor.execute(sql_command)
+
+# sql_command = """INSERT INTO INSTRUCTOR VALUES(20012, 'Robert', 'Stien', 'Associate Prof.', 2000, 'ENG', 'stienr');"""
+# cursor.execute(sql_command)
+
+# sql_command = """INSERT INTO INSTRUCTOR VALUES(20013, 'George', 'Stephenson', 'Associate Prof.', 1900, 'MATH', 'stephensong');"""
+# cursor.execute(sql_command)
+
+# sql_command = """INSERT INTO INSTRUCTOR VALUES(20014, 'Barrak', 'Obama', 'Associate Prof.', 2008, 'ENG', 'obamab');"""
+# cursor.execute(sql_command)
+
+# sql_command = """INSERT INTO INSTRUCTOR VALUES(20015, 'John', 'Wentworth', 'Full Prof.', 1867, 'ARCH', 'wentworthj');"""
+# cursor.execute(sql_command)
+
+# sql_command = """DELETE FROM INSTRUCTOR WHERE SURNAME = 'Fourier';"""
+# cursor.execute(sql_command) 
+
+
+# sql_command = """UPDATE ADMIN 
+# SET TITLE = 'Vice-President'
+# WHERE ID = 30002 ;"""
+# cursor.execute(sql_command) 
+
+# sql_command = """INSERT INTO USERS VALUES ('user', 'pass', 'user');"""
+# cursor.execute(sql_command)
+
+# sql_command = """INSERT INTO USERS VALUES ('instructor', 'pass456', 'instructor');"""
+# cursor.execute(sql_command)
+
+# sql_command = """INSERT INTO USERS VALUES ('admin', 'pass789', 'admin');"""
+# cursor.execute(sql_command)
+
+print("COURSE table")
+cursor.execute("""SELECT * FROM COURSE""")
+query_result = cursor.fetchall()
+for i in query_result:
+	print(i)
+
+print("STUDENT table")
+cursor.execute("""SELECT * FROM STUDENT""")
+query_result = cursor.fetchall()
+for i in query_result:
+	print(i)
+
+print("ADMIN table")
+cursor.execute("""SELECT * FROM ADMIN""")
+query_result = cursor.fetchall()
+for i in query_result:
+	print(i)
+
+print("INSTRUCTOR table")
+cursor.execute("""SELECT * FROM INSTRUCTOR""")
+query_result = cursor.fetchall()
+
+sql_command = """
+SELECT INSTRUCTOR.SURNAME, COURSE.Title, COURSE.Department
+FROM INSTRUCTOR
+JOIN COURSE ON INSTRUCTOR.DEPT = COURSE.Department;
+"""
+
+cursor.execute(sql_command)
+matches = cursor.fetchall()
+
+print("Instructors and the courses they can teach:")
+for surname, title, department in matches:
+    print(f"Instructor {surname} can teach '{title}' in the {department} department.")
+
+
+for i in query_result:
+	print(i)
+
+
+## Add 5 courses to each student in database
+# sql_command = """
+# ALTER TABLE STUDENT ADD COURSE1 TEXT;
+# """
+# cursor.execute(sql_command)
+
+# sql_command = """
+# ALTER TABLE STUDENT ADD COURSE2 TEXT;
+# """
+# cursor.execute(sql_command)
+
+# sql_command = """
+# ALTER TABLE STUDENT ADD COURSE3 TEXT;
+# """
+# cursor.execute(sql_command)
+
+# sql_command = """
+# ALTER TABLE STUDENT ADD COURSE4 TEXT;
+# """
+# cursor.execute(sql_command)
+
+# sql_command = """
+# ALTER TABLE STUDENT ADD COURSE5 TEXT;
+# """
+# cursor.execute(sql_command)
+
+# cursor.execute("""
+# UPDATE STUDENT
+# SET	COURSE1 = 1,
+# 	COURSE2 = 6,
+# 	COURSE3 = 7,
+# 	COURSE4 = 9,
+# 	COURSE5 = 11
+# WHERE ID = 10001;	   
+# """)
+
+# for student_id in range(10002, 10013):  # 10013 is exclusive
+#     courses = random.sample(range(1, 21), 5)  # Random 5 unique courses from 1–20
+#     sql_command = f"""
+#     UPDATE STUDENT
+#     SET COURSE1 = {courses[0]},
+#         COURSE2 = {courses[1]},
+#         COURSE3 = {courses[2]},
+#         COURSE4 = {courses[3]},
+#         COURSE5 = {courses[4]}
+#     WHERE ID = {student_id};
+#     """
+#     cursor.execute(sql_command)
+
+
+# sql_command = """
+# ALTER TABLE STUDENT ADD PASSWORD TEXT;
+# """
+# cursor.execute(sql_command)
+# for student_id in range(10001, 10019):  
+# 	sql_command = f"""
+# 	UPDATE STUDENT
+# 	SET PASSWORD = 'pass'
+# 	WHERE ID = {student_id};
+# 	"""
+# 	cursor.execute(sql_command)
+
+# sql_command = """
+# ALTER TABLE INSTRUCTOR ADD PASSWORD TEXT;
+# """
+# cursor.execute(sql_command)
+# for id in range(20002, 20016):  
+# 	sql_command = f"""
+# 	UPDATE INSTRUCTOR
+# 	SET PASSWORD = 'pass'
+# 	WHERE ID = {id};
+# 	"""
+# 	cursor.execute(sql_command)
+
+# sql_command = """
+# UPDATE INSTRUCTOR
+# SET PASSWORD = 'pass'
+# WHERE PASSWORD IS NULL OR PASSWORD = '';
+# """
+# cursor.execute(sql_command)
+
+sql_command = """
+ALTER TABLE ADMIN ADD PASSWORD TEXT;
+"""
+cursor.execute(sql_command)
+for student_id in range(30001, 30005):  
+	sql_command = f"""
+	UPDATE ADMIN
+	SET PASSWORD = 'pass'
+	WHERE ID = {student_id};
+	"""
+	cursor.execute(sql_command)
+
+
+#Commit Database
+database.commit() 
+
+# close the connection 
+database.close() 
+	
