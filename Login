@@ -1,0 +1,200 @@
+import sqlite3
+import tkinter as tk
+from tkinter import messagebox
+import subprocess 
+
+def initialize_database():
+    connect = sqlite3.connect('assignment3_1.db')
+    cursor = connect.cursor()
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS users (
+        username TEXT PRIMARY KEY,
+        password TEXT NOT NULL,
+        role TEXT CHECK(role IN ('user', 'instructor', 'admin')) NOT NULL
+    )
+    ''')
+    connect.commit()
+
+    # Register default users
+    try:
+        cursor.execute("INSERT INTO users VALUES (?, ?, ?)", ("user", "password123", "user"))
+        cursor.execute("INSERT INTO users VALUES (?, ?, ?)", ("instructor", "pass456", "instructor"))
+        cursor.execute("INSERT INTO users VALUES (?, ?, ?)", ("admin", "pass789", "admin"))
+    except sqlite3.IntegrityError:
+        pass  # Users already exist
+
+    connect.commit()
+    connect.close()
+
+def register_user(username, password, role):
+
+    if role not in ['user', 'instructor', 'admin']:
+        print("Invalid role.")
+        return
+
+    connect = sqlite3.connect('assignment3_1.db')
+    cursor = connect.cursor()
+
+    try:
+        cursor.execute("INSERT INTO users (username, password, role) VALUES (?, ?, ?)", (username, password, role))
+        connect.commit()
+        print("User registered successfully.")
+    except sqlite3.IntegrityError:
+        print("Username already exists.")
+    finally:
+        connect.close()
+        
+        
+def login_user():
+    email = user_entry.get()
+    password = pass_entry.get()
+
+    conn = sqlite3.connect('assignment3_1.db')
+    cursor = conn.cursor()
+
+    role = None
+
+    # Check STUDENT table
+    cursor.execute("SELECT * FROM STUDENT WHERE email = ? AND password = ?", (email, password))
+    if cursor.fetchone():
+        role = "student"
+    else:
+        # Check INSTRUCTOR table
+        cursor.execute("SELECT * FROM INSTRUCTOR WHERE email = ? AND password = ?", (email, password))
+        if cursor.fetchone():
+            role = "instructor"
+        else:
+            # Check ADMIN table
+            cursor.execute("SELECT * FROM ADMIN WHERE email = ? AND password = ?", (email, password))
+            if cursor.fetchone():
+                role = "admin"
+
+    conn.close()
+
+    if role:
+        print(f"Login successful. Role: {role}")
+        messagebox.showinfo("Login Successful", f"Welcome, {email}! Role: {role}")
+        m.destroy()  # Close the login window
+
+        if role == "student":
+            subprocess.run(["python", "Student.py"])
+        elif role == "instructor":
+            subprocess.run(["python", "Instructor.py"])
+        elif role == "admin":
+            subprocess.run(["python", "Admin.py"])
+    else:
+        messagebox.showerror("Login Failed", "Invalid email or password.")
+
+        
+def open_reset_window():
+    def reset_password():
+        uname = username_entry.get()
+        new_pass = new_password_entry.get()
+
+        if not uname or not new_pass:
+            messagebox.showerror("Error", "All fields are required.")
+            return
+
+        conn = sqlite3.connect('assignment3_1.db')
+        cur = conn.cursor()
+
+        # List of tables to search
+        user_tables = ['STUDENT', 'INSTRUCTOR', 'ADMIN']
+        updated = False
+
+        for table in user_tables:
+            # Check if username exists in current table
+            cur.execute(f"SELECT * FROM {table} WHERE email = ?", (uname,))
+            if cur.fetchone():
+                # If found, update the password
+                cur.execute(f"UPDATE {table} SET password = ? WHERE email = ?", (new_pass, uname))
+                conn.commit()
+                updated = True
+                break  # Stop searching after first match
+
+        conn.close()
+
+        if updated:
+            messagebox.showinfo("Success", "Password reset successfully.")
+            reset_win.destroy()
+        else:
+            messagebox.showerror("Error", "Username not found in any user table.")
+
+    reset_win = tk.Toplevel(m)
+    reset_win.title("Reset Password")
+    reset_win.geometry("300x200")
+
+    tk.Label(reset_win, text="Username (email):").pack(pady=5)
+    username_entry = tk.Entry(reset_win)
+    username_entry.pack()
+
+    tk.Label(reset_win, text="New Password:").pack(pady=5)
+    new_password_entry = tk.Entry(reset_win, show="*")
+    new_password_entry.pack()
+
+    tk.Button(reset_win, text="Reset", command=reset_password).pack(pady=15)
+
+
+def help():
+    help_win = tk.Toplevel(m)
+    help_win.title("Troubleshooting Guide")
+    help_win.geometry("600x300")
+
+    help_text = """
+    Troubleshooting Login System
+
+    • Make sure your username and password are correct.
+    • Usernames are case-sensitive.
+    • If you've forgotten your password, use the 'Reset Password' button.
+    • Only the roles: user, instructor, and admin are accepted.
+    • Contact system admin if your account is locked or not found.
+
+    Example Users:
+    - Username: user | Password: password123
+    - Username: instructor | Password: pass456
+    - Username: admin | Password: pass789
+    """
+
+    tk.Label(help_win, text=help_text, justify="left", anchor="w", padx=10, pady=10).pack(fill="both", expand=True)
+
+def about():
+    about_win = tk.Toplevel(m)
+    about_win.title("About")
+    about_win.geometry("700x200")
+
+    about_text = """
+    Creators:
+    Michael Ryan - Wentworth 26', Computer Engineering, ryanm13@wit.edu
+    Ryan Wallin - Wentworth 26', Computer Engineering, wallinr@wit.edu
+    Myles Freeman-Carter - Wentworth 26', Computer Engineering, freemancarterm@wit.edu
+    """
+    tk.Label(about_win, text=about_text, justify="left", anchor="w", padx=10, pady=10).pack(fill="both", expand=True)
+
+
+initialize_database()
+m = tk.Tk()
+m.title('Login to LeopardWeb')
+m.geometry("500x500")
+
+user_label = tk.Label(m, text="", font=("Helvetica", 14))
+user_label.pack(pady=10)
+
+tk.Label(m, text="Username:").pack()
+user_entry = tk.Entry(m)
+user_entry.pack()
+
+pass_label = tk.Label(m, text="", font=("Helvetica", 14))
+pass_label.pack(pady=10)
+
+tk.Label(m, text="Password:").pack()
+pass_entry = tk.Entry(m, show="*")
+pass_entry.pack()
+
+tk.Button(m, text='Login', width=25, command=login_user).pack(pady=5)
+tk.Button(m, text='Reset Password', width=25, command=open_reset_window).pack(pady=5)
+tk.Button(m, text='Help', width=25, command=help).pack(pady=5)
+tk.Button(m, text='About', width=25, command=about).pack(pady=5)
+tk.Button(m, text='Exit', width=25, command=m.destroy).pack(pady=5)
+
+
+m.mainloop()
