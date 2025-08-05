@@ -1,0 +1,427 @@
+import sqlite3
+import tkinter as tk
+from tkinter import ttk, messagebox
+
+## Course Class
+class Course:
+    def __init__(self, CRN, title, dept, time, dayofWeek, semester, year, credits, instructor):
+        self.CRN = CRN
+        self.title = title
+        self.dept = dept
+        self.time = time
+        self.dayofWeek = dayofWeek
+        self.semester = semester
+        self.year = year
+        self.credits = credits
+        self.instructor = instructor
+
+# Database connection and initialization
+DATABASE_NAME = "assignment3_1.db"
+
+def connect_db():
+    conn = sqlite3.connect(DATABASE_NAME)
+    cursor = conn.cursor()
+    # Create tables if they don't exist
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS COURSE (
+            CRN TEXT PRIMARY KEY,
+            title TEXT,
+            department TEXT,
+            time TEXT,
+            DOTW TEXT,
+            semester TEXT,
+            year INTEGER,
+            credits INTEGER,
+            instructor TEXT
+        )
+    ''')
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS INSTRUCTOR (
+            ID TEXT PRIMARY KEY,
+            first TEXT,
+            last TEXT,
+            title TEXT,
+            yearofHire INTEGER,
+            dept TEXT,
+            email TEXT
+        )
+    ''')
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS STUDENT (
+            ID TEXT PRIMARY KEY,
+            first TEXT,
+            last TEXT,
+            grad INTEGER,
+            major TEXT,
+            email TEXT,
+            course1 TEXT,
+            course2 TEXT,
+            course3 TEXT,
+            course4 TEXT,
+            course5 TEXT
+        )
+    ''')
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS ADMIN (
+            ID TEXT PRIMARY KEY,
+            first TEXT,
+            last TEXT,
+            title TEXT,
+            office TEXT,
+            email TEXT
+        )
+    ''')
+    conn.commit()
+    return conn, cursor
+
+database, cursor = connect_db()
+
+## Course object (this will be managed within the GUI, no longer a global list)
+# all_courses = [] # No longer needed as a global list, data will be fetched from DB
+
+##Save course function
+def save_course_to_db(course_obj):
+    cursor.execute('''
+        INSERT OR REPLACE INTO COURSE 
+        (CRN, title, department, time, DOTW, semester, year, credits, instructor)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ''', (course_obj.CRN, course_obj.title, course_obj.dept, course_obj.time, 
+          course_obj.dayofWeek, course_obj.semester, course_obj.year, 
+          course_obj.credits, course_obj.instructor))
+    database.commit()
+
+def delete_course_from_db(crn):
+    cursor.execute("DELETE FROM COURSE WHERE CRN = ?", (crn,))
+    database.commit()
+
+def add_user_to_db(user_type, user_data):
+    if user_type == "Instructor":
+        cursor.execute(
+            "INSERT INTO INSTRUCTOR (ID, first, last, title, yearofHire, dept, email) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            (user_data['ID'], user_data['first'], user_data['last'], user_data['title'], user_data['yearofHire'], user_data['dept'], user_data['email'])
+        )
+    elif user_type == "Student":
+        cursor.execute(
+            "INSERT INTO STUDENT (ID, first, last, grad, major, email, course1, course2, course3, course4, course5) VALUES (?, ?, ?, ?, ?, ?, NULL, NULL, NULL, NULL, NULL)",
+            (user_data['ID'], user_data['first'], user_data['last'], user_data['grad'], user_data['major'], user_data['email'])
+        )
+    elif user_type == "Admin":
+        cursor.execute(
+            "INSERT INTO ADMIN (ID, first, last, title, office, email) VALUES (?, ?, ?, ?, ?, ?)",
+            (user_data['ID'], user_data['first'], user_data['last'], user_data['title'], user_data['office'], user_data['email'])
+        )
+    database.commit()
+
+def delete_user_from_db(user_type, user_id):
+    if user_type == "Instructor":
+        cursor.execute("DELETE FROM INSTRUCTOR WHERE ID = ?", (user_id,))
+    elif user_type == "Student":
+        cursor.execute("DELETE FROM STUDENT WHERE ID = ?", (user_id,))
+    elif user_type == "Admin":
+        cursor.execute("DELETE FROM ADMIN WHERE ID = ?", (user_id,))
+    database.commit()
+
+class AdminGUI:
+    def __init__(self, master):
+        self.master = master
+        master.title("Admin Panel - Course & User Management")
+        master.geometry("800x600") # Set a default window size
+
+        # Notebook for different functionalities
+        self.notebook = ttk.Notebook(master)
+        self.notebook.pack(expand=True, fill="both", padx=10, pady=10)
+
+        # Tabs
+        self.course_management_tab = ttk.Frame(self.notebook)
+        self.user_management_tab = ttk.Frame(self.notebook)
+        self.view_data_tab = ttk.Frame(self.notebook)
+
+        self.notebook.add(self.course_management_tab, text="Course Management")
+        self.notebook.add(self.user_management_tab, text="User Management")
+        self.notebook.add(self.view_data_tab, text="View Data")
+
+        self.create_course_management_tab()
+        self.create_user_management_tab()
+        self.create_view_data_tab()
+
+    # --- Course Management Tab ---
+    def create_course_management_tab(self):
+        # Add Course Frame
+        add_course_frame = ttk.LabelFrame(self.course_management_tab, text="Add Course")
+        add_course_frame.pack(padx=10, pady=10, fill="x")
+
+        labels = ["CRN:", "Title:", "Department:", "Time:", "Day of Week:", 
+                  "Semester:", "Year:", "Credits:", "Instructor:"]
+        self.course_entries = {}
+        for i, text in enumerate(labels):
+            ttk.Label(add_course_frame, text=text).grid(row=i, column=0, sticky="w", padx=5, pady=2)
+            entry = ttk.Entry(add_course_frame)
+            entry.grid(row=i, column=1, sticky="ew", padx=5, pady=2)
+            self.course_entries[text.replace(":", "").strip().lower().replace(" ", "")] = entry
+        
+        ttk.Button(add_course_frame, text="Add Course", command=self.add_system_course_gui).grid(row=len(labels), columnspan=2, pady=10)
+
+        # Remove Course Frame
+        remove_course_frame = ttk.LabelFrame(self.course_management_tab, text="Remove Course")
+        remove_course_frame.pack(padx=10, pady=10, fill="x")
+        
+        ttk.Label(remove_course_frame, text="CRN to Remove:").grid(row=0, column=0, sticky="w", padx=5, pady=2)
+        self.remove_crn_entry = ttk.Entry(remove_course_frame)
+        self.remove_crn_entry.grid(row=0, column=1, sticky="ew", padx=5, pady=2)
+        ttk.Button(remove_course_frame, text="Remove Course", command=self.remove_system_course_gui).grid(row=1, columnspan=2, pady=10)
+
+    def add_system_course_gui(self):
+        try:
+            crn = self.course_entries["crn"].get().strip()
+            title = self.course_entries["title"].get().strip()
+            dept = self.course_entries["department"].get().strip()
+            time = self.course_entries["time"].get().strip()
+            dayofWeek = self.course_entries["dayofweek"].get().strip()
+            semester = self.course_entries["semester"].get().strip()
+            year = int(self.course_entries["year"].get().strip())
+            credits = int(self.course_entries["credits"].get().strip())
+            instructor = self.course_entries["instructor"].get().strip()
+
+            if not all([crn, title, dept, time, dayofWeek, semester, instructor]):
+                messagebox.showerror("Input Error", "All fields must be filled for course information.")
+                return
+
+            new_course = Course(crn, title, dept, time, dayofWeek, semester, year, credits, instructor)
+            save_course_to_db(new_course)
+            messagebox.showinfo("Success", f"Course '{title}' added successfully.")
+            self.clear_course_entries()
+            self.update_view_data_tab() # Refresh data after adding
+        except ValueError:
+            messagebox.showerror("Input Error", "Year and Credits must be numbers.")
+        except Exception as e:
+            messagebox.showerror("Error", f"An error occurred: {e}")
+
+    def remove_system_course_gui(self):
+        crn_to_remove = self.remove_crn_entry.get().strip()
+        if not crn_to_remove:
+            messagebox.showwarning("Input Missing", "Please enter the CRN of the course to remove.")
+            return
+
+        confirm = messagebox.askyesno("Confirm Removal", f"Are you sure you want to remove course with CRN: {crn_to_remove}?")
+        if confirm:
+            try:
+                delete_course_from_db(crn_to_remove)
+                messagebox.showinfo("Success", "Course removed successfully.")
+                self.remove_crn_entry.delete(0, tk.END)
+                self.update_view_data_tab() # Refresh data after removing
+            except Exception as e:
+                messagebox.showerror("Error", f"An error occurred: {e}")
+
+    def clear_course_entries(self):
+        for entry_widget in self.course_entries.values():
+            entry_widget.delete(0, tk.END)
+
+    # --- User Management Tab ---
+    def create_user_management_tab(self):
+        # Add User Frame
+        add_user_frame = ttk.LabelFrame(self.user_management_tab, text="Add User")
+        add_user_frame.pack(padx=10, pady=10, fill="x")
+
+        ttk.Label(add_user_frame, text="User Type:").grid(row=0, column=0, sticky="w", padx=5, pady=2)
+        self.user_type_combobox = ttk.Combobox(add_user_frame, values=["Instructor", "Student", "Admin"], state="readonly")
+        self.user_type_combobox.grid(row=0, column=1, sticky="ew", padx=5, pady=2)
+        self.user_type_combobox.set("Student") # Default selection
+        self.user_type_combobox.bind("<<ComboboxSelected>>", self.on_user_type_selected)
+
+        self.user_entries_frame = ttk.Frame(add_user_frame)
+        self.user_entries_frame.grid(row=1, column=0, columnspan=2, sticky="ew", padx=5, pady=5)
+        
+        self.user_entries = {}
+        self.create_user_specific_fields("Student") # Initial fields
+
+        ttk.Button(add_user_frame, text="Add User", command=self.add_user_gui).grid(row=2, columnspan=2, pady=10)
+
+        # Remove User Frame
+        remove_user_frame = ttk.LabelFrame(self.user_management_tab, text="Remove User")
+        remove_user_frame.pack(padx=10, pady=10, fill="x")
+
+        ttk.Label(remove_user_frame, text="User Type:").grid(row=0, column=0, sticky="w", padx=5, pady=2)
+        self.remove_user_type_combobox = ttk.Combobox(remove_user_frame, values=["Instructor", "Student", "Admin"], state="readonly")
+        self.remove_user_type_combobox.grid(row=0, column=1, sticky="ew", padx=5, pady=2)
+        self.remove_user_type_combobox.set("Student") # Default selection
+
+        ttk.Label(remove_user_frame, text="User ID to Remove:").grid(row=1, column=0, sticky="w", padx=5, pady=2)
+        self.remove_user_id_entry = ttk.Entry(remove_user_frame)
+        self.remove_user_id_entry.grid(row=1, column=1, sticky="ew", padx=5, pady=2)
+        ttk.Button(remove_user_frame, text="Remove User", command=self.remove_user_gui).grid(row=2, columnspan=2, pady=10)
+
+    def on_user_type_selected(self, event):
+        selected_type = self.user_type_combobox.get()
+        self.create_user_specific_fields(selected_type)
+
+    def create_user_specific_fields(self, user_type):
+        # Clear existing entries
+        for widget in self.user_entries_frame.winfo_children():
+            widget.destroy()
+        self.user_entries.clear()
+
+        common_labels = ["ID:", "First Name:", "Last Name:", "Email:"]
+        specific_labels = {
+            "Instructor": ["Title:", "Year of Hire:", "Department:"],
+            "Student": ["Graduation Year:", "Major:"],
+            "Admin": ["Title:", "Office:"]
+        }
+
+        row_idx = 0
+        for text in common_labels:
+            ttk.Label(self.user_entries_frame, text=text).grid(row=row_idx, column=0, sticky="w", padx=5, pady=2)
+            entry = ttk.Entry(self.user_entries_frame)
+            entry.grid(row=row_idx, column=1, sticky="ew", padx=5, pady=2)
+            self.user_entries[text.replace(":", "").strip().lower().replace(" ", "")] = entry
+            row_idx += 1
+        
+        for text in specific_labels.get(user_type, []):
+            ttk.Label(self.user_entries_frame, text=text).grid(row=row_idx, column=0, sticky="w", padx=5, pady=2)
+            entry = ttk.Entry(self.user_entries_frame)
+            entry.grid(row=row_idx, column=1, sticky="ew", padx=5, pady=2)
+            self.user_entries[text.replace(":", "").strip().lower().replace(" ", "")] = entry
+            row_idx += 1
+
+    def add_user_gui(self):
+        user_type = self.user_type_combobox.get()
+        user_data = {}
+        try:
+            user_data['ID'] = self.user_entries['id'].get().strip()
+            user_data['first'] = self.user_entries['firstname'].get().strip()
+            user_data['last'] = self.user_entries['lastname'].get().strip()
+            user_data['email'] = self.user_entries['email'].get().strip()
+
+            if not all([user_data['ID'], user_data['first'], user_data['last'], user_data['email']]):
+                messagebox.showerror("Input Error", "Common user fields cannot be empty.")
+                return
+
+            if user_type == "Instructor":
+                user_data['title'] = self.user_entries['title'].get().strip()
+                user_data['yearofHire'] = int(self.user_entries['yearofhire'].get().strip())
+                user_data['dept'] = self.user_entries['department'].get().strip()
+                if not all([user_data['title'], user_data['dept']]):
+                     messagebox.showerror("Input Error", "Instructor specific fields cannot be empty.")
+                     return
+            elif user_type == "Student":
+                user_data['grad'] = int(self.user_entries['graduationyear'].get().strip())
+                user_data['major'] = self.user_entries['major'].get().strip()
+                if not user_data['major']:
+                    messagebox.showerror("Input Error", "Student specific fields cannot be empty.")
+                    return
+            elif user_type == "Admin":
+                user_data['title'] = self.user_entries['title'].get().strip()
+                user_data['office'] = self.user_entries['office'].get().strip()
+                if not all([user_data['title'], user_data['office']]):
+                    messagebox.showerror("Input Error", "Admin specific fields cannot be empty.")
+                    return
+
+            add_user_to_db(user_type, user_data)
+            messagebox.showinfo("Success", f"{user_type} '{user_data['first']} {user_data['last']}' added successfully.")
+            self.clear_user_entries()
+            self.update_view_data_tab() # Refresh data after adding
+        except ValueError:
+            messagebox.showerror("Input Error", "Year of Hire, Graduation Year must be numbers.")
+        except Exception as e:
+            messagebox.showerror("Error", f"An error occurred: {e}")
+
+    def remove_user_gui(self):
+        user_type = self.remove_user_type_combobox.get()
+        user_id = self.remove_user_id_entry.get().strip()
+
+        if not user_id:
+            messagebox.showwarning("Input Missing", "Please enter the User ID to remove.")
+            return
+
+        confirm = messagebox.askyesno("Confirm Removal", f"Are you sure you want to remove {user_type} with ID: {user_id}?")
+        if confirm:
+            try:
+                delete_user_from_db(user_type, user_id)
+                messagebox.showinfo("Success", f"{user_type} removed successfully (if existed).")
+                self.remove_user_id_entry.delete(0, tk.END)
+                self.update_view_data_tab() # Refresh data after removing
+            except Exception as e:
+                messagebox.showerror("Error", f"An error occurred: {e}")
+
+    def clear_user_entries(self):
+        for entry_widget in self.user_entries.values():
+            entry_widget.delete(0, tk.END)
+        # Recreate specific fields to reset to default
+        self.create_user_specific_fields(self.user_type_combobox.get())
+
+
+    # --- View Data Tab ---
+    def create_view_data_tab(self):
+        self.data_tree = {} # Dictionary to hold Treeview widgets for each table
+
+        tables_to_display = {
+            "COURSE": ["CRN", "Title", "Department", "Time", "Day of Week", "Semester", "Year", "Credits", "Instructor"],
+            "INSTRUCTOR": ["ID", "First Name", "Last Name", "Title", "Year of Hire", "Department", "Email"],
+            "STUDENT": ["ID", "First Name", "Last Name", "Graduation Year", "Major", "Email", "Course 1", "Course 2", "Course 3", "Course 4", "Course 5"],
+            "ADMIN": ["ID", "First Name", "Last Name", "Title", "Office", "Email"]
+        }
+
+        for table_name, columns in tables_to_display.items():
+            frame = ttk.LabelFrame(self.view_data_tab, text=f"Data: {table_name}")
+            frame.pack(padx=10, pady=10, fill="both", expand=True)
+
+            # Create a Treeview (table)
+            tree = ttk.Treeview(frame, columns=columns, show="headings")
+            for col in columns:
+                tree.heading(col, text=col)
+                tree.column(col, width=100, anchor="w") # Default width, adjust as needed
+            
+            # Add scrollbars
+            vsb = ttk.Scrollbar(frame, orient="vertical", command=tree.yview)
+            hsb = ttk.Scrollbar(frame, orient="horizontal", command=tree.xview)
+            tree.configure(yscrollcommand=vsb.set, xscrollcommand=hsb.set)
+            
+            tree.grid(row=0, column=0, sticky="nsew")
+            vsb.grid(row=0, column=1, sticky="ns")
+            hsb.grid(row=1, column=0, sticky="ew")
+
+            frame.grid_rowconfigure(0, weight=1)
+            frame.grid_columnconfigure(0, weight=1)
+            
+            self.data_tree[table_name] = tree
+
+        self.update_view_data_tab()
+        
+        ttk.Button(self.view_data_tab, text="Refresh Data", command=self.update_view_data_tab).pack(pady=10)
+
+
+    def update_view_data_tab(self):
+        # Clear existing data in all Treeviews
+        for tree_name in self.data_tree:
+            for item in self.data_tree[tree_name].get_children():
+                self.data_tree[tree_name].delete(item)
+
+        # Fetch and insert new data for Courses
+        cursor.execute("SELECT * FROM COURSE")
+        courses_data = cursor.fetchall()
+        for row in courses_data:
+            self.data_tree["COURSE"].insert("", "end", values=row)
+
+        # Fetch and insert new data for Instructors
+        cursor.execute("SELECT * FROM INSTRUCTOR")
+        instructor_data = cursor.fetchall()
+        for row in instructor_data:
+            self.data_tree["INSTRUCTOR"].insert("", "end", values=row)
+
+        # Fetch and insert new data for Students
+        cursor.execute("SELECT * FROM STUDENT")
+        student_data = cursor.fetchall()
+        for row in student_data:
+            self.data_tree["STUDENT"].insert("", "end", values=row)
+            
+        # Fetch and insert new data for Admins
+        cursor.execute("SELECT * FROM ADMIN")
+        admin_data = cursor.fetchall()
+        for row in admin_data:
+            self.data_tree["ADMIN"].insert("", "end", values=row)
+
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = AdminGUI(root)
+    root.mainloop()
+    database.close() # Close the database connection when the GUI closes
